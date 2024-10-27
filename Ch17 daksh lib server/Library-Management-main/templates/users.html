@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Functions</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="text-center">Library Functions</h1>
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary" onclick="showSection('search')">Search a Book</button>
+            <button class="btn btn-primary" onclick="showSection('issue')">Issue Book</button>
+            <button class="btn btn-primary" onclick="showSection('return')">Return Book</button>
+        </div>
+
+        <div id="searchSection" class="hidden mt-4">
+            <h2>Search a Book</h2>
+            <form action="{{ url_for('searchBook') }}" method="POST">
+                <div class="form-group">
+                    <label for="search_choice">Search by:</label>
+                    <div>
+                        <label for="search_by_id" class="mr-2">
+                            <input type="radio" id="search_by_id" name="search_choice" value="1" required>
+                            ID
+                        </label>
+                        <label for="search_by_name">
+                            <input type="radio" id="search_by_name" name="search_choice" value="2" required>
+                            Name
+                        </label>
+                    </div>
+                </div>
+
+                <div id="search_by_id_div" class="hidden form-group">
+                    <label for="book_id_search">Enter Book ID:</label>
+                    <input type="text" id="book_id_search" name="book_id" class="form-control">
+                </div>
+
+                <div id="search_by_name_div" class="hidden form-group">
+                    <label for="book_name_search">Enter Book Name:</label>
+                    <input type="text" id="book_name_search" name="book_name" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-success mt-3">Search Book</button>
+            </form>
+        </div>
+
+        <div id="issueSection" class="hidden mt-4">
+            <h2>Issue Book</h2>
+            <form action="{{ url_for('issueBook') }}" method="post">
+                <div class="form-group">
+                    <label for="rollNo">Roll Number:</label>
+                    <input type="text" id="rollNo" name="rollNo" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="issue_choice">Issue book by:</label>
+                    <select id="issue_choice" name="issue_choice" class="form-control" required>
+                        <option value="" disabled selected>Select your option</option>
+                        <option value="1">ID</option>
+                        <option value="2">Name</option>
+                    </select>
+                </div>
+
+                <div id="book_id_section" class="hidden form-group">
+                    <label for="book_id">Enter Book ID:</label>
+                    <input type="text" id="book_id" name="book_id" class="form-control">
+                </div>
+
+                <div id="book_name_section" class="hidden form-group">
+                    <label for="book_name">Enter Book Name:</label>
+                    <input type="text" id="book_name" name="book_name" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-success mt-3">Issue Book</button>
+            </form>
+        </div>
+
+        <div id="returnSection" class="hidden mt-4">
+            <h2>Return Book</h2>
+            <form action="{{ url_for('returnBook') }}" method="post">
+                <div class="form-group">
+                    <label for="rollNo">Roll Number:</label>
+                    <input type="text" id="rollNo" name="rollNo2" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="return_choice">Return book by:</label>
+                    <select id="return_choice" name="return_choice" class="form-control" required>
+                        <option value="" disabled selected>Select your option</option>
+                        <option value="1">ID</option>
+                        <option value="2">Name</option>
+                    </select>
+                </div>
+
+                <div id="book_id_sec" class="hidden form-group">
+                    <label for="book_id">Enter Book ID:</label>
+                    <input type="text" id="book_id" name="book_id2" class="form-control">
+                </div>
+
+                <div id="book_name_sec" class="hidden form-group">
+                    <label for="book_name">Enter Book Name:</label>
+                    <input type="text" id="book_name" name="book_name2" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-success mt-3">Return Book</button>
+            </form>
+        </div>
+        <div class="alert alert-success" id="successMessage" style="display:none;"></div>
+        <div class="alert alert-danger" id="errorMessage" style="display:none;"></div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        messageDiv = document.getElementById("successMessage")
+        errorDiv = document.getElementById("errorMessage")
+
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('searchSection').style.display = 'none';
+            document.getElementById('issueSection').style.display = 'none';
+            document.getElementById('returnSection').style.display = 'none';
+
+            // Show the selected section
+            document.getElementById(section + 'Section').style.display = 'block';
+        }
+
+
+        // Script for Search Book
+        const searchRadioButtons = document.querySelectorAll('input[name="search_choice"]');
+        const searchByIdDiv = document.getElementById('search_by_id_div');
+        const searchByNameDiv = document.getElementById('search_by_name_div');
+
+        searchRadioButtons.forEach((radio) => {
+            radio.addEventListener('change', () => {
+                if (radio.value === '1') {
+                    searchByIdDiv.style.display = 'block';
+                    searchByNameDiv.style.display = 'none';
+                } else {
+                    searchByIdDiv.style.display = 'none';
+                    searchByNameDiv.style.display = 'block';
+                }
+            });
+        });
+
+        const issueChoice = document.getElementById('issue_choice');
+        const bookIdSection = document.getElementById('book_id_section');
+        const bookNameSection = document.getElementById('book_name_section');
+
+        issueChoice.addEventListener('change', function () {
+            if (this.value === '1') {
+                bookIdSection.style.display = 'block';
+                bookNameSection.style.display = 'none';
+            } else if (this.value === '2') {
+                bookIdSection.style.display = 'none';
+                bookNameSection.style.display = 'block';
+            }
+        });
+
+        const returnChoice = document.getElementById('return_choice');
+        const bookIdSec = document.getElementById('book_id_sec');
+        const bookNameSec = document.getElementById('book_name_sec');
+
+        returnChoice.addEventListener('change', function () {
+            if (this.value === '1') {
+                bookIdSec.style.display = 'block';
+                bookNameSec.style.display = 'none';
+            } else if (this.value === '2') {
+                bookIdSec.style.display = 'none';
+                bookNameSec.style.display = 'block';
+            }
+        });
+
+        document.getElementById('searchSection').addEventListener('submit', function (event) {
+
+            event.preventDefault();
+            messageDiv.style.display ="none";
+            errorDiv.style.display = "none";
+            var formData = new FormData(event.target);
+
+            fetch('/search_book', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var message = data.message;
+                    var error = data.error;
+
+                    if (message) {
+
+                        messageDiv.innerHTML = message + "-> ID: " + data.books.ID + " , NAME: " + data.books.Name + " , AUTHOR: " + data.books.Author + " , QUANTITY: " + data.books.Quantity;
+                        messageDiv.style.display = "block"
+                    }
+                    if (error) {
+                        errorDiv.innerHTML = error;
+                        errorDiv.style.display = "block"
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        document.getElementById('issueSection').addEventListener('submit', function (event) {
+
+            event.preventDefault();
+            messageDiv.style.display ="none";
+            errorDiv.style.display = "none";
+            var formData = new FormData(event.target);
+
+            fetch('/issueBook', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var message = data.message;
+                    var error = data.error;
+
+                    if (message) {
+                        messageDiv.innerHTML = message;
+                        messageDiv.style.display = "block"
+                    }
+                    if (error) {
+                        errorDiv.innerHTML = error;
+                        errorDiv.style.display = "block"
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        document.getElementById('returnSection').addEventListener('submit', function (event) {
+
+            event.preventDefault();
+            messageDiv.style.display ="none";
+            errorDiv.style.display = "none";
+            var formData = new FormData(event.target);
+
+            fetch('/returnBook', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    var message = data.message;
+                    var error = data.error;
+
+                    if (message) {
+                        messageDiv.innerHTML = message;
+                        messageDiv.style.display = "block"
+                    }
+                    if (error) {
+                        errorDiv.innerHTML = error;
+                        errorDiv.style.display = "block"
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+
+    </script>
+</body>
+
+</html>
